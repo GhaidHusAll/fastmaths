@@ -3,6 +3,7 @@ package com.example.fastmaths
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -22,8 +23,7 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
-        shakeAnim = AnimationUtils.loadAnimation(this, R.anim.wiggle)
-        binding.btnStart.startAnimation(shakeAnim)
+       setTimeAnime()
         binding.btnStart.setOnClickListener {
             val toGame = Intent(this@HomeActivity,GameActivity::class.java)
             startActivity(toGame)
@@ -42,5 +42,18 @@ class HomeActivity : AppCompatActivity() {
             //doesn't exist
             vm.addInformation(User(0,0,1),dao)
         }
+    }
+    private fun setTimeAnime(){
+        val timer = object: CountDownTimer(3000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+            }
+
+            override fun onFinish() {
+                shakeAnim = AnimationUtils.loadAnimation(this@HomeActivity, R.anim.wiggle)
+                binding.btnStart.startAnimation(shakeAnim)
+                setTimeAnime()
+            }
+        }
+        timer.start()
     }
 }

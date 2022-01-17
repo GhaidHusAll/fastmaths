@@ -4,17 +4,22 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import com.example.fastmaths.databinding.ActivityGameBinding
-import com.example.fastmaths.databinding.ActivityHomeBinding
+import java.util.*
 
 class GameActivity : AppCompatActivity() {
     private lateinit var binding : ActivityGameBinding
     private lateinit var anim : Animation
-    var winningResult = 0.0
+    private lateinit var animEnd : Animation
+    var time = 20000L
+    private lateinit var timer : CountDownTimer
+    var winningResult = 0F
     var level = 1
+    var score = 0
     private val operations = listOf("+","-","×","÷")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,17 +27,20 @@ class GameActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
         setOperation()
+        binding.tvScore.text = "Your Score : $score"
         binding.apply {
             btnOption1.setOnClickListener {
-                checkResult(btnOption1.text.toString().toDouble())
+                checkResult(btnOption1.text.toString().toFloat())
             }
             btnOption2.setOnClickListener {
-                checkResult(btnOption2.text.toString().toDouble())
+                checkResult(btnOption2.text.toString().toFloat())
             }
-            btnOption2.setOnClickListener {
-                checkResult(btnOption2.text.toString().toDouble())
+            btnOption3.setOnClickListener {
+                checkResult(btnOption3.text.toString().toFloat())
             }
+            btnQuit.setOnClickListener {endGame("Quit Playing")}
         }
+
     }
    @SuppressLint("SetTextI18n")
    private fun setOperation(){
@@ -41,12 +49,17 @@ class GameActivity : AppCompatActivity() {
        val randomOperation = (operations.indices).random()
        binding.tvProblem.text = "$randomFirst ${operations[randomOperation]} $randomSecond"
        when(operations[randomOperation]){
-           "+" -> {winningResult = (randomFirst + randomSecond).toDouble()}
-           "-" -> {winningResult =  (randomFirst - randomSecond).toDouble()}
-           "×" -> {winningResult =  (randomFirst * randomSecond).toDouble()}
-           "÷" -> {winningResult = randomFirst.toDouble() / randomSecond.toDouble()}
+           "+" -> {winningResult = (randomFirst + randomSecond).toFloat()}
+           "-" -> {winningResult =  (randomFirst - randomSecond).toFloat()}
+           "×" -> {winningResult =  (randomFirst * randomSecond).toFloat()}
+           "÷" -> {winningResult = randomFirst.toFloat() / randomSecond.toFloat()}
        }
        setOptions()
+       if (this::timer.isInitialized){
+           timer.cancel()
+       }
+       setTime()
+
    }
     private fun setOptions(){
         val option = mutableListOf(winningResult , winningResult+(1..7).random(),winningResult-(1..3).random()).shuffled()
@@ -56,26 +69,68 @@ class GameActivity : AppCompatActivity() {
             btnOption3.text = "${option[2]}"
         }
     }
-    private fun checkResult(clicked:Double){
+    private fun checkResult(clicked:Float){
         if (winningResult == clicked){
             //win
             setOperation()
+            score =+ 1
+            binding.tvScore.text = "Your Score : $score"
         }else{
             //lose
-           endGame()
+           endGame("inCorrect Answer Try Again")
         }
     }
-    private fun endGame(){
+    private fun endGame(message :String){
         binding.apply {
             llEnd.isVisible = true
             llProblem.isVisible = false
             llbuttons.isVisible = false
-            anim = AnimationUtils.loadAnimation(this@GameActivity, R.anim.winning)
+            cvTime.isVisible = false
+            tvEndMessage.text = message
+            anim = AnimationUtils.loadAnimation(this@GameActivity, R.anim.enter)
             binding.llEnd.startAnimation(anim)
             btnToMain.setOnClickListener {
-                val toHome = Intent(this@GameActivity,HomeActivity::class.java)
-                startActivity(toHome)
+                animEnd = AnimationUtils.loadAnimation(this@GameActivity, R.anim.exit)
+                binding.llEnd.startAnimation(animEnd)
+                animEnd.setAnimationListener(object : Animation.AnimationListener{
+                    override fun onAnimationStart(p0: Animation?) {
+                       // binding.llEnd.startAnimation(animEnd)
+                    }
+
+                    override fun onAnimationEnd(p0: Animation?) {
+                        val toHome = Intent(this@GameActivity,HomeActivity::class.java)
+                        startActivity(toHome)
+                    }
+
+                    override fun onAnimationRepeat(p0: Animation?) {
+                        TODO("Not yet implemented")
+                    }
+
+                })
+
             }
         }
     }
+    private fun setTime(){
+         time = 20000L
+        val totalTime = time
+         timer = object: CountDownTimer(time, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                binding.tvTimer.text = "0:${time.toInt()/1000}"
+                val percentage = (time.toDouble() / totalTime.toDouble()) * 100
+                time -= 1000
+                binding.timeProgress.progress = percentage.toInt()
+            }
+
+            override fun onFinish() {
+                binding.tvTimer.text = "0:00"
+                binding.timeProgress.progress = 0
+                endGame("Time Is Up Try Again")
+            }
+        }
+        timer.start()
+    }
+
+
+
 }
