@@ -2,16 +2,25 @@ package com.example.fastmaths
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
+import androidx.lifecycle.ViewModelProvider
+import com.example.fastmaths.database.FastMathsDatabase
+import com.example.fastmaths.database.User
 import com.example.fastmaths.databinding.ActivityGameBinding
+import com.example.fastmaths.model.FastMathsViewModel
 import java.util.*
 
 class GameActivity : AppCompatActivity() {
+    private lateinit var sharedPreferences: SharedPreferences
+    private val dao by lazy { FastMathsDatabase.getDatabase(this).dao() }
+    private val vm by lazy { ViewModelProvider(this).get(FastMathsViewModel::class.java) }
     private lateinit var binding : ActivityGameBinding
     private lateinit var anim : Animation
     private lateinit var animEnd : Animation
@@ -81,12 +90,17 @@ class GameActivity : AppCompatActivity() {
         }
     }
     private fun endGame(message :String){
+        val info = vm.theUser
+        if (info.value?.highScore!! < score){
+            vm.updateInformation(User(info.value?.pk!!,score,info.value?.level!!),dao)
+        }
         binding.apply {
             llEnd.isVisible = true
             llProblem.isVisible = false
             llbuttons.isVisible = false
             cvTime.isVisible = false
             tvEndMessage.text = message
+            tvResultAndScore.text = "correct answers is $score"
             anim = AnimationUtils.loadAnimation(this@GameActivity, R.anim.enter)
             binding.llEnd.startAnimation(anim)
             btnToMain.setOnClickListener {
@@ -131,6 +145,28 @@ class GameActivity : AppCompatActivity() {
         timer.start()
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        Log.d("GameActivity","IN onRestart")
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("GameActivity","IN onPause")
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("GameActivity","IN onStop")
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("GameActivity","IN onDestroy")
+
+    }
 
 }

@@ -45,7 +45,7 @@
             android:textColor="@color/white"
             android:paddingTop="20dp"
             android:paddingBottom="20dp"
-            android:text="correct answer is 30" />
+            android:text="correct answers is 3" />
 
         <Button
             android:id="@+id/btnToMain"
