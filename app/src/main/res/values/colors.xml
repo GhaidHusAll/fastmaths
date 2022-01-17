@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="darkBabyPink">#FB7FF4</color>
+    <color name="darkBabyGreen">#36D686</color>
+    <color name="darkBabyBlue">#527BF6</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+<!--  colors  -->
+    <color name="babyPink">#FF9EF9</color>
+    <color name="babyGreen">#48D48E</color>
+    <color name="babyBlue">#7796F2</color>
+</resources>
